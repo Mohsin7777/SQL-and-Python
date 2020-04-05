@@ -1,0 +1,8 @@
+
+
+PUT() always creates character variables
+INPUT() can create character or numeric variables based on the informat
+>>converts character variable with numeric value and informat to a character variable.
+>>converts character variable with numeric value and informat to a numeric variable.
+
+

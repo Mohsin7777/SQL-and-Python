@@ -1,0 +1,35 @@
+USE [ELVIS]
+GO
+/****** Object:  StoredProcedure [dbo].[usp_flag_Dupes]    Script Date: 10/19/2015 14:31:25 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[usp_flag_Dupes]
+	@database varchar(50),
+	@schema varchar(50),
+	@filename varchar(100)
+AS
+BEGIN
+	
+	SET NOCOUNT ON;
+	DECLARE @SQLCMD NVARCHAR(4000), @email varchar(50)
+
+	set @filename = REPLACE(REPLACE(@filename,'[',''),']','')
+
+	EXEC ELVIS.dbo.usp_GetEmailFieldName @database,@filename,@email output
+	
+	SET @SQLCMD = N'UPDATE T
+					set dupe = 1
+					FROM  ' + @database + '.' + @schema + '.' + @filename + ' T,
+						(SELECT [' + @email + '] as memail,min([id]) as mid
+						from ' + @database + '.' + @schema + '.' + @filename + '
+						group by [' + @email + ']
+						having count(*) > 1
+						)x
+					where [' + @email + '] = memail
+					and [id] > mid'					
+								
+	EXEC sp_executesql @SQLCMD
+	
+END

@@ -1,0 +1,48 @@
+
+--- SIMPLE CASE (ALPHABETICAL RANKING, ONLY TWO VARIABLES):
+select "pp_soc", DEST_SOC
+        ,ROW_NUMBER() over (partition by "pp_soc" order by  DEST_SOC ASC) as DEST_SOCRank
+       INTO #TEMP4
+       FROM #TEMP3
+	   	   
+	   
+---> 3 VARIABLES: THIS PARTITIONS BY "CITY" AND "CATEGORY", WHILE ORDERING THE RANK BY SALES:
+---> FIRST VARIABLE (CITY) DOES NOT NEED PARTITION, IT IS DONE AUTOMATICALLY BY SELECT STATEMENT
+---> SECOND VARIABLE (CATEGORY) REQUIRES 'PARTITIONING'
+
+select CUSTOMER_CITY, CATEGORY_NAME, COMPLETED_SALES
+        ,ROW_NUMBER() over (partition by CUSTOMER_CITY order by  COMPLETED_SALES DESC) as RANKING
+INTO #SALES_COMPLETED_ORDERS6
+       FROM #SALES_COMPLETED_ORDERS5
+
+-- RESULT: TOP 5 CATEGORIES, BY CITY (BASED ON COMPLETED SALES)
+SELECT  CUSTOMER_CITY, RANKING , CATEGORY_NAME, COMPLETED_SALES
+FROM #SALES_COMPLETED_ORDERS6
+WHERE RANKING <= 5
+ORDER BY CUSTOMER_CITY, RANKING , CATEGORY_NAME
+	   
+	   
+	   
+-------->>> COMBINED WITH SUB QUERY (ALLOWS FOR WHERE CLAUSE TO SELECT YOUR CHOSEN RANK) - IN ONE QUERY
+
+SELECT week
+, CAST(enddate as DATE) as Week_Ending
+, Asset
+, content_title 
+, downloads
+FROM 
+(
+  SELECT RANK() OVER (PARTITION BY week, asset order by downloads DESC) AS ranking,
+    [Week]
+      ,startdate
+      ,enddate
+      ,[Asset]
+      ,content_title
+      ,Downloads
+  FROM #temp1
+) AS huh
+WHERE ranking <= 100
+AND ASSET <> 'Gameloft Subscription'
+AND ASSET <> 'Ringtone Subscription Activations'
+order by week desc
+	   

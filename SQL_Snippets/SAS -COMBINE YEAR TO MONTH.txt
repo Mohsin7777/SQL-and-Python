@@ -1,0 +1,4 @@
+
+
+mdy(bill_month,1,bill_year) format date9. as date_field
+

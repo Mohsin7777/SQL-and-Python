@@ -1,0 +1,12 @@
+
+
+
+PROC EXPORT DATA =_aaa.test_roman
+
+     OUTFILE ='/sasprdshare/test_roman_excel.xlsx'
+
+     DBMS = xlsx REPLACE;
+
+
+run;
+

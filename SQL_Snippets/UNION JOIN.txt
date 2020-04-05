@@ -1,0 +1,25 @@
+This is a count of instances of a specific value (popular sports) spread throughout all the "TP#" columns of a table, using the identity column to join the result of the union X with the original table O
+
+
+select tp1, tp2,tp3,tp4,tp5,tp6,tp7,tp8,COUNT(*)
+from [Optik_Migration_Wave3_20150708] o,(
+select id,tp1 pack from [Optik_Migration_Wave3_20150708]
+union
+select id,tp2 pack from [Optik_Migration_Wave3_20150708]
+union
+select id,tp3 pack from [Optik_Migration_Wave3_20150708]
+union
+select id,tp4 pack from [Optik_Migration_Wave3_20150708]
+union
+select id,tp5 pack from [Optik_Migration_Wave3_20150708]
+union
+select id,tp6 pack from [Optik_Migration_Wave3_20150708]
+union
+select id,tp7 pack from [Optik_Migration_Wave3_20150708]
+union
+select id,tp8 pack from [Optik_Migration_Wave3_20150708]
+)x
+where pack = 'POPULAR SPORTS'
+and o.id = x.id
+group by tp1, tp2,tp3,tp4,tp5,tp6,tp7,tp8
+order by count(*) desc

@@ -1,0 +1,8 @@
+
+/*the characters defined are the ones kept, rest are all replaced with a blank space */
+
+compress(STRIP(A.MV_MODEL ),"ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 ", "kis")  AS  MV_MODEL
+
+ 
+
+

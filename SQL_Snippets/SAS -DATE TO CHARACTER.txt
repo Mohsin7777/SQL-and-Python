@@ -1,0 +1,6 @@
+
+data test;   
+   Date='02JAN2018'd;
+   CharDate=put(Date, yymmdd10.);
+   format Date date9.;
+run;

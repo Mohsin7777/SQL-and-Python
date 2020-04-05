@@ -1,0 +1,1 @@
+select sum(value*weight) / sum(case when value is not null then weight else 0 end)

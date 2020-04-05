@@ -1,0 +1,15 @@
+-------------------------weighted avg:
+
+ 
+
+proc means data=temp1 sum sumwgt mean  nway;
+
+class YEAR MONTH FRANCHISE_TP  ZONE2 UTILIZATION_GROUP RLH_OPTED_IN ;
+
+weight TRAVELLERS;
+
+var TRAVEL_DAYS;
+
+output out=temp2 (drop=_:)  mean =/ autoname;
+
+run;

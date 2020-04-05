@@ -1,0 +1,84 @@
+
+
+
+
+/* TEST RESULT TABLE */
+
+proc sql;
+
+CREATE TABLE MOHSIN.CHECKS
+
+(RESULT NUM)
+
+;quit;
+
+ 
+
+ 
+
+/* HARD SET COUNTER FOR ITTERATIONS, SET TO WHATEVER */
+
+proc sql;
+
+CREATE TABLE MOHSIN.COUNTER
+
+(COUNT NUM);
+
+INSERT INTO  MOHSIN.COUNTER
+
+VALUES(20)
+
+;quit;
+
+ 
+
+/*LOOP*/
+
+proc sql;
+
+select distinct COUNT  into :loop_cnt from mohsin.COUNTER  ;
+
+quit;
+
+ 
+
+%macro loop_dt;
+
+ 
+
+%do i=1 %to &loop_cnt. ;      
+
+ 
+
+/* INSERT CODE BELOW */
+
+PROC SQL;
+
+INSERT INTO MOHSIN.CHECKS
+
+VALUES(1)
+
+;QUIT;
+
+ 
+
+ 
+
+/* INSERT CODE ABOVE  */
+
+ 
+
+%end;
+
+ 
+
+%mend loop_dt;
+
+ 
+
+options symbolgen mlogic mprint;
+
+%loop_dt;
+
+
+ 

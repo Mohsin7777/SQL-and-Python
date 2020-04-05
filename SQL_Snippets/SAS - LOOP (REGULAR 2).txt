@@ -1,0 +1,204 @@
+
+
+
+
+%global INDEX;
+
+%global MONTH;
+
+%global YEAR;
+
+%global END_1;
+
+%global som;
+
+%let today=%sysfunc(datetime(),datetime22.3);
+
+%put &today.;
+
+
+
+
+
+
+
+options symbolgen;
+
+
+
+
+
+%macro loop;
+
+
+
+%do %while (&index >= 89   )   ;       
+
+
+
+
+
+
+
+proc sql;
+
+          SELECT DISTINCT (MONTH_DATE) into :MONTH
+
+                     FROM dev_dbo.TIME_DIM_MONTHLY
+
+                               WHERE INDEX_NO = &INDEX.;
+
+          SELECT DISTINCT YEAR_DATE into :YEAR
+
+                     FROM dev_dbo.TIME_DIM_MONTHLY
+
+                               WHERE INDEX_NO = &INDEX.;
+
+          SELECT DISTINCT EOM into :END_1
+
+                     FROM dev_dbo.TIME_DIM_MONTHLY
+
+                               WHERE YEAR_DATE = &YEAR. AND MONTH_DATE = &MONTH.;
+
+SELECT DISTINCT SOM into :SOM
+
+                     FROM dev_dbo.TIME_DIM_MONTHLY
+
+                               WHERE YEAR_DATE = &YEAR. AND MONTH_DATE = &MONTH.
+
+;
+
+quit;
+
+
+
+%put &INDEX. &YEAR. &MONTH. &END_1. &SOM.;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* paste code below */
+
+
+
+
+
+/* paste code above */
+
+
+
+
+
+
+
+
+
+
+
+%let INDEX = &INDEX - 1;
+
+%end;
+
+
+
+%mend;
+
+
+
+options symbolgen mlogic mprint;
+
+%let INDEX =110;
+
+%loop;
+
+
+
+
+%put &index  &year &month &start &end;
+
+
+
+
+
+
+
+
+
+
+
+---- SAS / Hadoop passthrough - sort of loop, for a big join list:
+
+>> break list of joined things into seperate lists, and then run 5 times:
+
+
+
+data svr.VPSOCS_INCLUDING_VMCLID;
+
+set VPSOCS_INCLUDING_VMCLID;
+
+n_list = mod(_n_,5)+1;
+
+run;
+
+ 
+
+
+
+ 
+
+/* get list of customers with active VP socs */
+
+%macro get_soc(dsTarget, iList);
+
+proc sql; select "'" || trim(soc) || "'" into :list_soc Separated by ',' from svr.VPSOCS_INCLUDING_VMCLID where n_list = &iList.; quit;
+
+%put &list_soc.;
+
+proc sql ;
+
+    connect to oracle (username=&usr_odin. password=&pwd_odin. path=exaodin) ;
+
+    create table &dsTarget. as
+
+    select  *   from connection to Oracle   (
+
+        select ban, subscriber_no, product_type, soc, effective_date, expiration_date
+
+           from ods.service_agreement
+
+           where product_type = 'C' and (expiration_date is null or expiration_date >= to_date('2017/11/21', 'YYYY/MM/DD') ) and soc in (&list_soc.)
+
+        ) ;
+
+    disconnect from oracle ;
+
+quit ;
+
+%mend get_soc;
+
+ 
+
+%get_soc(sub_vp_1, 1);
+
+%get_soc(sub_vp_2, 2);
+
+%get_soc(sub_vp_3, 3);
+
+%get_soc(sub_vp_4, 4);
+
+
+%get_soc(sub_vp_5, 5);
+
+
+

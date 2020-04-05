@@ -1,0 +1,58 @@
+
+data svr.VPSOCS_INCLUDING_VMCLID;
+
+set VPSOCS_INCLUDING_VMCLID;
+
+n_list = mod(_n_,5)+1;
+
+run;
+
+ 
+
+
+
+ 
+
+/* get list of customers with active VP socs */
+
+%macro get_soc(dsTarget, iList);
+
+proc sql; select "'" || trim(soc) || "'" into :list_soc Separated by ',' from svr.VPSOCS_INCLUDING_VMCLID where n_list = &iList.; quit;
+
+%put &list_soc.;
+
+proc sql ;
+
+    connect to oracle (username=&usr_odin. password=&pwd_odin. path=exaodin) ;
+
+    create table &dsTarget. as
+
+    select  *   from connection to Oracle   (
+
+        select ban, subscriber_no, product_type, soc, effective_date, expiration_date
+
+           from ods.service_agreement
+
+           where product_type = 'C' and (expiration_date is null or expiration_date >= to_date('2017/11/21', 'YYYY/MM/DD') ) and soc in (&list_soc.)
+
+        ) ;
+
+    disconnect from oracle ;
+
+quit ;
+
+%mend get_soc;
+
+ 
+
+%get_soc(sub_vp_1, 1);
+
+%get_soc(sub_vp_2, 2);
+
+%get_soc(sub_vp_3, 3);
+
+%get_soc(sub_vp_4, 4);
+
+
+%get_soc(sub_vp_5, 5);
+

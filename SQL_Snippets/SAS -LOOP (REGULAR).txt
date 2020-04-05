@@ -1,0 +1,191 @@
+
+
+
+
+%global LOOP_DATE;
+
+proc sql;
+
+select count(*)  into :loop_cnt from mohsin.test  ;
+
+quit;
+
+ 
+
+%macro loop_dt;
+
+ 
+
+%do %while ( &loop_cnt. > 0 )    ;      
+
+ 
+
+proc sql;
+
+select min(LOCATION_UPDATE_NUMERIC) format=date9. into :loop_date from mohsin.test  ;
+
+quit;
+
+ 
+
+%put &LOOP_DATE.;
+
+ 
+
+ 
+
+proc sql;
+
+insert into mohsin.test_output
+
+select distinct *
+
+from mohsin.test
+
+where LOCATION_UPDATE_NUMERIC = "&LOOP_DATE"d;
+
+quit;
+
+ 
+
+proc sql;
+
+delete from  mohsin.test
+
+where LOCATION_UPDATE_NUMERIC = "&LOOP_DATE"d;
+
+quit;
+
+ 
+
+%global LOOP_DATE;
+
+ 
+
+proc sql;
+
+select count(*)  into :loop_cnt from mohsin.test  ;
+
+quit;
+
+%end;
+
+ 
+
+%mend loop_dt;
+
+ 
+
+options symbolgen mlogic mprint;
+
+%loop_dt;
+
+ 
+
+
+ The SQL Loop test version is below, please copy and run this to see how it works: 
+
+create table #TEST
+
+(data varchar(20)
+
+,LOCATION_UPDATE_NUMERIC date)
+
+insert into #TEST
+
+select 'example1', '2018-04-10'
+
+insert into #TEST
+
+select 'example2', '2018-04-11'
+
+ 
+
+select *
+
+from #TEST
+
+ 
+
+select *
+
+INTO #TEST_OUTPUT
+
+from #TEST
+
+ 
+
+TRUNCATE TABLE #TEST_OUTPUT
+
+ 
+
+----------- loop condition:
+
+WHILE (SELECT COUNT(*) FROM #TEST) > 0
+
+ 
+
+BEGIN
+
+ 
+
+DECLARE @DAY DATE
+
+SET @DAY = (SELECT MIN(LOCATION_UPDATE_NUMERIC) FROM #TEST)
+
+ 
+
+ 
+
+/* code below */
+
+ 
+
+insert into #test_output
+
+select distinct *
+
+from #test
+
+where LOCATION_UPDATE_NUMERIC = @DAY
+
+ 
+
+delete from  #test
+
+where LOCATION_UPDATE_NUMERIC =  @DAY
+
+ 
+
+/* code above */
+
+ 
+
+END
+
+
+
+
+
+
+ 
+
+ 
+
+--- result, it moves the records from #test to #test_output one by one, by min day:
+
+ 
+
+SELECT *
+
+FROM #test
+
+ 
+
+SELECT *
+
+FROM #test_output
+
+
+
+

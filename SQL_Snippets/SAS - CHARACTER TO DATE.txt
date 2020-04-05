@@ -1,0 +1,25 @@
+
+
+----------------#1
+Data want;
+set have;
+format datevar date9.;
+datevar = input ( chardate, MMDDYY10.);
+run;
+
+
+-------------------- #2
+data example;
+input dateofbirth $20.;
+cards;
+05/11/1980
+07/05/1990
+04/14/1981
+;
+run;
+
+data out;
+set example;
+dateofbirth2 = input(strip(dateofbirth),MMDDYY10.);
+format dateofbirth2 MMDDYY10.;
+run;

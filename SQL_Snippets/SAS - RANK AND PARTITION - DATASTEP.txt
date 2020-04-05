@@ -1,0 +1,221 @@
+
+
+3 examples:
+Example 1: Ranking Values of Multiple Variables
+Example 2: Ranking Values within BY Groups
+Example 3: Partitioning Observations into Groups Based on Ranks
+
+------------------------ general options of datastep:
+PROC RANK Statement
+PROC RANK <option(s)>;
+Task	Option
+Specify the input data set	DATA=
+Create an output data set	OUT=
+Specify the ranking method	
+
+Compute fractional ranks	FRACTION or NPLUS1
+
+Partition observations into groups	GROUPS=
+
+Compute normal scores	NORMAL=
+
+Compute percentages	PERCENT
+
+Compute Savage scores	SAVAGE
+Reverse the order of the rankings	DESCENDING
+Specify how to rank tied values	TIES=
+
+
+
+
+
+Example 1: Ranking Values of Multiple Variables
+
+This example performs the following actions:
+
+reverses the order of the ranks so that the highest value receives the rank of 1
+
+assigns the best possible rank to tied values
+
+creates ranking variables and prints them with the original variables
+
+
+options nodate pageno=1 linesize=80 pagesize=60;
+
+data cake;
+   input Name $ 1-10 Present 12-13 Taste 15-16;
+   datalines;
+Davis      77 84
+Orlando    93 80
+Ramey      68 72
+Roe        68 75
+Sanders    56 79
+Simms      68 77
+Strickland 82 79
+;
+
+proc rank data=cake out=order descending ties=low;
+ Note about code	
+   var present taste;
+   ranks PresentRank TasteRank;
+run;
+	
+proc print data=order;
+   title "Rankings of Participants' Scores";
+run;
+
+           Obs    Name          Present    Taste      Rank      Rank
+
+            1     Davis            77        84        3         1  
+            2     Orlando          93        80        1         2  
+            3     Ramey            68        72        4         7  
+            4     Roe              68        75        4         6  
+            5     Sanders          56        79        7         3  
+            6     Simms            68        77        4         5  
+            7     Strickland       82        79        2         3  
+			
+			
+			
+Example 2: Ranking Values within BY Groups
+
+This example performs the following actions:
+
+ranks observations separately within BY groups
+
+reverses the order of the ranks so that the highest value receives the rank of 1
+
+assigns the best possible rank to tied values
+
+creates ranking variables and prints them with the original variables
+
+
+options nodate pageno=1 linesize=80 pagesize=60;
+	
+data elect;
+   input Candidate $ 1-11 District 13 Vote 15-18 Years 20;
+   datalines;
+Cardella    1 1689 8
+Latham      1 1005 2
+Smith       1 1406 0
+Walker      1  846 0
+Hinkley     2  912 0
+Kreitemeyer 2 1198 0
+Lundell     2 2447 6
+Thrash      2  912 2
+;
+	
+proc rank data=elect out=results ties=low descending;
+ Note about code	
+   by district;
+ 	
+   var vote years;
+   ranks VoteRank YearsRank;
+run;
+
+proc print data=results n;
+   by district;
+   title 'Results of City Council Election';
+run; 
+
+  Results of City Council Election                       1
+
+---------------------------------- District=1 ----------------------------------
+
+                                                    Vote    Years
+               Obs    Candidate    Vote    Years    Rank     Rank
+
+                1     Cardella     1689      8        1       1  
+                2     Latham       1005      2        3       2  
+                3     Smith        1406      0        2       3  
+                4     Walker        846      0        4       3  
+
+                                     N = 4
+
+
+---------------------------------- District=2 ----------------------------------
+
+                                                     Vote    Years
+              Obs    Candidate      Vote    Years    Rank     Rank
+
+               5     Hinkley         912      0        3       3  
+               6     Kreitemeyer    1198      0        2       3  
+               7     Lundell        2447      6        1       1  
+               8     Thrash          912      2        3       2  
+
+                                     N = 4
+									 
+									 
+Example 3: Partitioning Observations into Groups Based on Ranks
+
+This example performs the following actions:
+
+partitions observations into groups on the basis of values of two input variables
+
+groups observations separately within BY groups
+
+replaces the original variable values with the group values
+
+
+options nodate pageno=1 linesize=80 pagesize=60;
+data swim;
+   input Name $ 1-7 Gender $ 9 Back 11-14 Free 16-19;
+   datalines;
+Andrea  F 28.6 30.3
+Carole  F 32.9 24.0
+Clayton M 27.0 21.9
+Curtis  M 29.0 22.6
+Doug    M 27.3 22.4
+Ellen   F 27.8 27.0
+Jan     F 31.3 31.2
+Jimmy   M 26.3 22.5
+Karin   F 34.6 26.2
+Mick    M 29.0 25.4
+Richard M 29.7 30.2
+Sam     M 27.2 24.1
+Susan   F 35.1 36.1
+;
+proc sort data=swim out=pairs;
+   by gender;
+run;
+
+proc rank data=pairs out=rankpair groups=3;
+   by gender;
+   var back free;
+run;
+
+proc print data=rankpair n;
+   by gender;
+   title 'Pairings of Swimmers for Backstroke and Freestyle';
+run;
+
+Pairings of Swimmers for Backstroke and Freestyle               1
+
+----------------------------------- Gender=F -----------------------------------
+
+                         Obs    Name      Back    Free
+
+                           1    Andrea      0       1 
+                           2    Carole      1       0 
+                           3    Ellen       0       1 
+                           4    Jan         1       2 
+                           5    Karin       2       0 
+                           6    Susan       2       2 
+
+                                     N = 6
+
+
+----------------------------------- Gender=M -----------------------------------
+
+                         Obs    Name       Back    Free
+
+                           7    Clayton      0       0 
+                           8    Curtis       2       1 
+                           9    Doug         1       0 
+                          10    Jimmy        0       1 
+                          11    Mick         2       2 
+                          12    Richard      2       2 
+                          13    Sam          1       1 
+
+                                     N = 7
+
+									 
